@@ -1,0 +1,45 @@
+# Build
+bin/
+obj/
+
+# Visual Studio
+.vs/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Arquivos de usuário
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+
+# Pacotes
+packages/
+
+# Entity Framework
+*.dbmdl
+
+# Configurações locais
+appsettings.Development.json
+
+# Publicação
+publish/
+
+# Testes
+TestResults/
+
+# Node (caso use frontend no mesmo repositório)
+node_modules/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

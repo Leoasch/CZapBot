@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Whatsapp.Api/Whatsapp.Api.csproj" />
+    <Project Path="src/Whatsapp.Application/Whatsapp.Application.csproj" />
+    <Project Path="src/Whatsapp.Infrastructure/Whatsapp.Infrastructure.csproj" />
+    <Project Path="src/Whatsapp.Worker/Whatsapp.Worker.csproj" />
+  </Folder>
+</Solution>

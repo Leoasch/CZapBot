@@ -1,0 +1,35 @@
+services:
+  frontend:
+      build: ./frontend
+      ports:
+        - "3000:3000"
+      depends_on:
+        - api
+  api:
+    build:
+      context: .
+      dockerfile: ./src/Whatsapp.Api/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+  worker:
+    build: 
+      context: .
+      dockerfile: ./src/Whatsapp.Worker/Dockerfile
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+  redis:
+    image: redis:7
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
