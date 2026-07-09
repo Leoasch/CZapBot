@@ -1,12 +1,36 @@
+using Microsoft.EntityFrameworkCore;
+using Whatsapp.Application.Interfaces;
 using Whatsapp.Infrastructure;
+using Whatsapp.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddControllers();
-
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddControllers();
+builder.Services.AddHttpClient<IEvolutionApiService, EvolutionApiService>(client =>
+{
+    var uriString = builder.Configuration["Evolution:Uri"] ?? throw new InvalidOperationException("Configuration value 'Evolution:Uri' is missing.");
+    client.BaseAddress = new Uri(uriString);
+    Console.WriteLine($"uriString: {uriString}");
+    client.DefaultRequestHeaders.Add(
+        "apiKey",
+        builder.Configuration["Evolution:ApiKey"]
+    );
+});
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("Postgres")
+    );
+});
+builder.Services.AddScoped<ContactRepository>();
+
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -21,28 +45,5 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

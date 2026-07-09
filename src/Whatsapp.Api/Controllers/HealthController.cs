@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
+using Whatsapp.Application.Interfaces;
 
 namespace Whatsapp.Api.Controllers;
 
@@ -8,10 +9,12 @@ namespace Whatsapp.Api.Controllers;
 public class HealthController : ControllerBase
 {
   private readonly IConnectionMultiplexer _redis;
-
-  public HealthController (IConnectionMultiplexer redis)
+  private readonly IEvolutionApiService _evolutionApi;
+  
+  public HealthController (IConnectionMultiplexer redis, IEvolutionApiService evolutionApi)
   {
     _redis = redis;
+    _evolutionApi = evolutionApi;
   }
 
   [HttpGet]
@@ -21,6 +24,11 @@ public class HealthController : ControllerBase
     {
       connected = true,
       message = "Redis is connected!"
+    };
+    var evoApiStatus = new
+    {
+      connected = true,
+      message = "Evolution API is connected!"
     };
 
     try
@@ -38,9 +46,23 @@ public class HealthController : ControllerBase
       };
     }
     
+    try
+    {
+      await _evolutionApi.GetInstancesAsync();
+    }
+    catch (System.Exception)
+    {
+      evoApiStatus = new
+      {
+        connected = false,
+        message = "Evolution API is not connected!"
+      };
+      throw;
+    }
     return Ok(new
     {
-      redis = redisStatus
+      redis = redisStatus,
+      evolutionApi = evoApiStatus
     });
     
   }

@@ -3,28 +3,40 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Whatsapp.Api.RequestModels;
 using Whatsapp.Application;
+using Whatsapp.Application.Interfaces;
 using Whatsapp.Infrastructure.Redis;
+
+namespace Whatsapp.Api.Controllers;
 
 [ApiController]
 [Route("api/message")]
-public class MessageController : ControllerBase
+public class MessageController (QueueService _queue, IEvolutionApiService _evolutionApi) : ControllerBase
 {
-  private readonly QueueService _queue;
-
-  public MessageController (QueueService queue)
+  [HttpGet("instances")]
+  public async Task<IActionResult> GetInstances ()
   {
-    _queue = queue;
+    var instances = await _evolutionApi.GetInstancesAsync();
+
+    return Ok(new
+    {
+      instances = instances
+    });
   }
 
   [HttpPost]
   public async Task<IActionResult> Send([FromBody] SendMessageRequest request)
   {
+    var job = new SendMessageJob
+    {
+      Phone = request.Phone,
+      Message = request.Message
+    };
     
-    var job = await _queue.EnqueueAsync(QueueNames.SendMessage, JsonSerializer.Serialize(request));
+    await _queue.EnqueueAsync(QueueNames.SendMessage, JsonSerializer.Serialize(job));
 
     return Ok(new
     {
-      result = JsonSerializer.Serialize(job)
+      message = "Job created."
     });
   }
 }

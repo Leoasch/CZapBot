@@ -16,8 +16,8 @@ public class QueueService
     return await _database.ListRightPushAsync(queuename, message);
   }
 
-  public async Task<RedisValue> DequeueAsync (string queuename)
+  public async Task<RedisValue> DequeueAsync(string queue)
   {
-    return await _database.ListLeftPopAsync(queuename);
+    return await _database.ListLeftPopAsync(queue);
   }
 }
